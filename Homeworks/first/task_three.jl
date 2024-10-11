@@ -23,11 +23,11 @@ for i in 1:length(whole_fruits)
     if new_item["cut"] == false
         new_item["cut"] = true
         println("Cutting ", whole_fruits[i]["fruit"],".")
-        push!(cut_fruits, new_item)
+        push!(cut_fruits, deepcopy(new_item))
     else
         # Fruit is already cut and being appended to the new array.
         println("Not cutting ", new_item["fruit"],".")
-        push!(cut_fruits, new_item)
+        push!(cut_fruits, deepcopy(new_item))
     end
 end
 println("End operation.")
