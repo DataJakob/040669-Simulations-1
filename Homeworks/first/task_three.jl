@@ -11,15 +11,16 @@ whole_fruits = [Dict("fruit"=>"apple", "weight"=>180, "cut"=> false),
 cut_fruits = []
 
 
+
 # Creating a for loop from 1 to length of array.
-println("Start")
+println("Start operation:")
 for i in 1:length(whole_fruits)
 
     # Save each item in the array
     new_item = whole_fruits[i]
 
     # If item is not cut; it will get cut and appended to the new array.
-    if whole_fruits[i]["cut"] == false
+    if new_item["cut"] == false
         new_item["cut"] = true
         println("Cutting ", whole_fruits[i]["fruit"],".")
         push!(cut_fruits, new_item)
@@ -29,7 +30,7 @@ for i in 1:length(whole_fruits)
         push!(cut_fruits, new_item)
     end
 end
-println("End")
+println("End operation.")
 
 # Print the final result
 println("\nFinal result:")
