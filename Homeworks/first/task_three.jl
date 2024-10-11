@@ -21,11 +21,11 @@ for i in 1:length(whole_fruits)
     # If item is not cut; it will get cut and appended to the new array.
     if whole_fruits[i]["cut"] == false
         new_item["cut"] = true
-        println("Cutting ", whole_fruits[i]["fruit"])
+        println("Cutting ", whole_fruits[i]["fruit"],".")
         push!(cut_fruits, new_item)
     else
         # Fruit is already cut and being appended to the new array.
-        println("Not cutting ", new_item["fruit"], "becuase it has been cut :)")
+        println("Not cutting ", new_item["fruit"],".")
         push!(cut_fruits, new_item)
     end
 end
