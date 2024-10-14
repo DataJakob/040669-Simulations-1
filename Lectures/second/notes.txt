@@ -68,7 +68,10 @@ Classical statistical test are two-sample kolmogorow smirnov, chi-square, mann-w
 
 Insection approaches are basic inspection approaches and correlated inspection approach (trace-driven simulation).
 There are also confidence-interval approaches. 
- 
+
+
+Summary 
+Read this and understand it. 
 
 
 
