@@ -1,26 +1,9 @@
 
-# mutable struct Server
-#     Busy::Bool
-# end
-# n_servers = 2
-
-
 arbitrary_person_que_length = 5
 n_customers = 7
 interarrival_times = [0.6, 0.3, 0.5, 0.2, 0.7, 0.3, 0.4]
 service_times = [0.6, 0.8, 1.2, 0.6, 1.1, 0.6, 0.5]
 
-
-# function server_generator(n_servers::Int)
-#     server_dict = Dict()
-#     for i in 1:n_servers
-#         server_id = "server$i"
-#         server_qual = Server(false)
-#         server_dict[server_id] = server_qual
-#     end
-#     println("--Servers has been generated")
-#     return server_dict
-# end
 
 
 function calculate_ia_and_s_times(
@@ -45,12 +28,11 @@ function calculate_ia_and_s_times(
 end
 
 
-function calculata_avg_wait_time(
+function caluclate_avg_waiting_time(
+    arbitrary_person_que_length::Int,
     calculate_ia_and_s_times::Function,
     ia_times::Vector{Float64}, 
     s_times::Vector{Float64},
-    n_customers::Int64,
-    arbitrary_person_que_length::Int,
     )
     """
     Calcualte average  waiting time that an abritrary person 
@@ -59,12 +41,65 @@ function calculata_avg_wait_time(
     cum_ia_times, cum_s_times = calculate_ia_and_s_times(
         ia_times, s_times
         )
-    waiting_time = 0
-    for i in 1:length(cum_s_times)
-        waiting_time += (cum_s_times[i] -s_times[i] - cum_ia_times[i])
+    
+    total_waiting_time = 0
+    inside_que = Float64[]
+    busy = false
+    calculation_leaver_time = cum_s_times[arbitrary_person_que_length]
+    process =  true
+
+    while process == true
+        if length(cum_ia_times) == 0
+            arrival = Inf
+        else
+            arrival = cum_ia_times[1]
+        end
+        departure = cum_s_times[1]
+        
+        # Continue the line
+        if departure > calculation_leaver_time || length(cum_s_times) == 0
+            process = false
+        end
+
+        # Arrival happens next
+        if arrival < departure
+            # Not busy -> no recording
+            if busy == false
+                popfirst!(cum_ia_times)
+                busy = true
+            # Busy -> start recording
+            else
+                push!(inside_que, deepcopy(arrival))
+                popfirst!(cum_ia_times)
+                busy = true
+            end
+        
+        # Departure happens next
+        else
+            # If no in queue -> no recording, set busy to false
+            if length(inside_que) == 0
+                popfirst!(cum_s_times)
+                busy = false
+            
+            # Someone in que -> calculate w-time and potential rest time
+            else
+                individual_que_time = departure - inside_que[1]
+                total_waiting_time += individual_que_time
+                popfirst!(inside_que)
+                popfirst!(cum_s_times)
+                busy = true        
+
+                if (length(cum_s_times) >= 1) && (cum_s_times[1] > calculation_leaver_time)
+                    rest_sum = calculation_leaver_time .-inside_que
+                    total_waiting_time += sum(rest_sum)
+                    process = false
+                end
+            end
+        end
     end
-    return  waiting_time/n_customers
+    return  total_waiting_time/calculation_leaver_time
 end
+
 
 
 
@@ -90,22 +125,25 @@ function caluclate_avg_que_length(
     return que_length / arbitrary_person_que_length
 end
 
-# a = server_generator(n_servers)
-b = calculate_ia_and_s_times(interarrival_times, service_times)
-# c = calculata_avg_wait_time(calculate_ia_and_s_times,
-#     interarrival_times,
-#     service_times,
-#     n_customers,
-# )
+a = calculate_ia_and_s_times(interarrival_times, service_times)
 
-# d = caluclate_avg_que_length(
-#     arbitrary_person_que_length, 
-#     calculate_ia_and_s_times,
-#     interarrival_times,
-#     service_times,
-#     )
-# avg_que_value = round(d, digits=2)
+b = caluclate_avg_que_length(
+    arbitrary_person_que_length, 
+    calculate_ia_and_s_times,
+    interarrival_times,
+    service_times,
+    )
+avg_que_value = round(b, digits=2)
 
-# println("---Program start---")
-# println("Average queue length is: $avg_que_value.")
-# println("---Program end---")
+c = caluclate_avg_waiting_time(
+    arbitrary_person_que_length, 
+    calculate_ia_and_s_times,
+    interarrival_times,
+    service_times,
+    )
+avg_wait_value = round(c, digits=2)
+
+println("---Program start---")
+println("Average queue length is: $avg_que_value.")
+println("Average waiting time is: $avg_wait_value.")
+println("---Program end---")
