@@ -1,3 +1,14 @@
+"""
+A program to calculate key parameters in 
+regards to queuing theory. 
+
+It calculates average waiting time and 
+average que length.
+
+It assumes only one server.
+It has a limited functionality according to examples that
+have been presented in the course so far. 
+"""
 
 arbitrary_person_que_length = 5
 n_customers = 7
