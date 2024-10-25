@@ -1,5 +1,3 @@
-
-
 include("src/input.jl")
 include("src/calculations.jl")
 
@@ -11,12 +9,12 @@ include("src/calculations.jl")
 
 
 println("----------------------Start-----------------------")
-# Dist_type, mean, sigma, n_arrivers, n_arrays, cons, random_seed
+# Dist_type, mean, sigma, n_arrivers, n_arrays, constant, random_seed
 arrival_times = Distribution_Generator("Normal", 0.5, 0.5, 6, 1, 1.0, 42)
 service_times = Distribution_Generator("Normal", 1.0, 0.6, 6, 1, 0.0, 1000)
 cum_ia_times, cum_s_times = Calculate_ia_and_s_times(arrival_times, service_times)
 
-# set n_servers, set 0 traffic, set busy to false, stop at person n
+# set n_servers, set 0 traffic, set busy to false
 myServer = ServerBase(1,0,false)
 
 # cum_ia_times, cum_s_times, stop at person n

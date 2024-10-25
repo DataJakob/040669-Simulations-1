@@ -131,6 +131,3 @@ function update_traffic(
         self.busy = false
     end
 end
-
-
-
