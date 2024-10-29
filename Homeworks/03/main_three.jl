@@ -21,7 +21,7 @@ myServer = ServerBase(1,0,false)
 avg_que = Calcualte_queue_length(cum_ia_times,cum_s_times, 5)
 
 # cum_ia_times, cum_s_times, server, stop at person n
-avg_wait = caluclate_avg_waiting_time(cum_ia_times, cum_s_times,  myServer, 6)
+avg_wait = caluclate_avg_waiting_time(cum_ia_times, cum_s_times,  myServer, 5)
 
 println("avg queue length: ",avg_que)
 println("avg wait time: ", avg_wait)

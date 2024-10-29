@@ -48,7 +48,7 @@ function caluclate_avg_waiting_time(
         # Stating start parameters.
         sel_waiting_time = 0
         inside_que = Float64[]
-        calculation_leaver_time = work_s_times[stop_calculate_at_person_n-1]
+        calculation_leaver_time = work_s_times[stop_calculate_at_person_n]
 
         process =  true
 
