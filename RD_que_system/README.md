@@ -40,9 +40,14 @@ Caluclate_avg_waiting_time(my_server,4.0)
 println("----------------------End-----------------------")
 
 ## Possibilities
-| n queues | n servers | change_que            | Possible   |
+| n queues | n servers | special functionality | Possible   |
 |----------|-----------|---------------------- |------------|
-| 1        | 1         |                       | ✅         |
-| 1        | n         |                       | ✅         |
-| n        | n         |  true                 | ✅        |
+| 1        | 1         |                                         | ✅         |
+| 1        | n         |                                         | ✅         |
+| n        | n         |                                         | ✅         |
+|         |           |  Change server queue when queue too long | ✅        |
+|         |           |  Leave queue after time x                | ❌         |
+|         |           |  Calculate avg. queue length             |      🔜     |
+|         |           |  Calculate acg. waiting time             |       🔜      |
+
 
