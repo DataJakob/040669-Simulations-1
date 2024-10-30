@@ -109,7 +109,7 @@ function Data_to_json(
         push!(data, sub_data)
     end
     json_string = JSON.json(data)
-    open("output.json", "w") do file
+    open("RD_que_system/data/output.json", "w") do file
         write(file, json_string)
     end
 end

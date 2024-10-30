@@ -16,6 +16,8 @@ mutable struct ServerBase
         queue_overload::Int64,
         current_traffic::Vector{Dict{String, Any}} = Dict{String, Any}[],
         current_queue::Vector{Dict{String, Any}} = Dict{String, Any}[],
+        # current_traffic::Vector{Dict{String, Any}},
+        # current_queue::Vector{Dict{String, Any}},
         )
         return new(
             n_servers,
@@ -31,7 +33,7 @@ end
 Function to check if server is busy
 """
 function check_busy(self::ServerBase)
-    if self.current_queue == self.n_servers
+    if length(self.current_traffic)-1 == self.n_servers
         return true
     else
         return false
@@ -65,9 +67,9 @@ function update_queue(
     add_true::Bool,
     change::Dict{String, Any}
     )
-    if add_true == false
-        popfirst!(self.current_queue)
-    else
+    if add_true == true
         push!(self.current_queue, deepcopy(change))
+    else
+        popfirst!(self.current_queue)
     end
 end
