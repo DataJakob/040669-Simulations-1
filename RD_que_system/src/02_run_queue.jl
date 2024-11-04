@@ -5,7 +5,6 @@ include("01_server.jl")
 include("00_arriver.jl")
 
 
-
 function Find_datapoint_in_json(id::String)
     first_index = Char(id[1]) - 'a' + 1
     second_index = parse(Int, id[2:end])
@@ -13,16 +12,16 @@ function Find_datapoint_in_json(id::String)
 end
 
 
-
 function Find_datapoint_in_server(dict_vector::Vector{ServerBase}, id::String)
     for i in 1:length(dict_vector)
-        if dict_vector[i].current_traffic[1]["id"] == id
-            return i  
-            break
+        for j in 1:length(dict_vector[i].current_traffic)
+            if dict_vector[i].current_traffic[j]["id"] == id
+                return (i,j)
+                break
+            end
         end
     end
 end
-
 
 
 
@@ -50,7 +49,6 @@ function Run_the_queue(
     end
     data_to_be_reduced = deepcopy(data)
     
-
     # Break statement -> break if there is no data to be processed
     process = true
     process_end_at_end = true
@@ -61,6 +59,8 @@ function Run_the_queue(
             process = false
             process_end_at_end = false
         end
+
+
 
 
         # Check which event happens next
@@ -87,24 +87,21 @@ function Run_the_queue(
             "id"=> nothing,
             "initial_line"=>nothing, 
             "cum_ia_time"=>Inf,
-            # "final_line"=>nothing,
             "type"=> "departure")
         push!(keys, "final_line")
         for i in 1:length(server_list)
-            if isempty(server_list[i].current_traffic)
-                nothing
-            else
-                bravo = server_list[i].current_traffic[1]
-                dep_time = bravo["cum_ia_time"]+bravo["s_time"]+bravo["w_time"]
-                if dep_time < next_departure["cum_ia_time"]
-                    bravo_upd = Dict(k=> bravo[k] for k in keys if haskey(bravo,k))
-                    merge!(next_departure, deepcopy(bravo_upd)) 
+            for j in 1:length(server_list[i].current_traffic)
+                if isempty(server_list[i].current_traffic[j])
+                    nothing
+                else
+                    bravo = server_list[i].current_traffic[j]
+                    dep_time = bravo["cum_ia_time"] + bravo["s_time"] + bravo["w_time"]
+                    if dep_time < next_departure["cum_ia_time"]
+                        bravo_upd = Dict(k=> bravo[k] for k in keys if haskey(bravo,k))
+                        merge!(next_departure, deepcopy(bravo_upd)) 
+                    end
                 end
             end
-        end
-        
-        if @isdefined(dep_time)
-            println(dep_time)
         end
 
 
@@ -112,21 +109,23 @@ function Run_the_queue(
 
         # Break statement -> break if next event is past stopping time
         if next_departure["id"] != nothing
-            server_nr = Find_datapoint_in_server(server_list, next_departure["id"])
-            next_departure_time = server_list[server_nr].current_traffic[1]["cum_ia_time"] + server_list[server_nr].current_traffic[1]["s_time"]+ server_list[server_nr].current_traffic[1]["w_time"]
+            server_idx, server_nr = Find_datapoint_in_server(server_list, next_departure["id"])
+            next_departure_time = server_list[server_idx].current_traffic[server_nr]["cum_ia_time"] +
+                server_list[server_idx].current_traffic[server_nr]["s_time"] + 
+                server_list[server_idx].current_traffic[server_nr]["w_time"]
             lowest = min(isempty(next_arriver["cum_ia_time"]) ? Inf : next_arriver["cum_ia_time"],
-            next_departure_time)
+                next_departure_time)
             if lowest > stop_at_time
                 process = false
-                println("break here")
                 break
             end
         end
 
+
+
+
         # State next departure time
-        if @isdefined next_departure_time
-            next_departure_time
-        else
+        if !@isdefined next_departure_time
             next_departure_time = Inf
         end 
 
@@ -136,10 +135,10 @@ function Run_the_queue(
 
             # If server overload -> search for servers that's not overloaded
             if check_busy(server_list[next_arriver["initial_line"]])
-                server_id = 0
+                server_idx = 0
                 for i in 1:length(server_list)
                     if length(server_list[i].current_queue) < server_base.queue_overload
-                        server_id = i
+                        server_idx = i
                         break
                     end
                 end
@@ -147,25 +146,24 @@ function Run_the_queue(
 
             # If server not overload -> set package in traffic or queue
             # Decide server number
-            if !@isdefined server_id
-                server_id = next_arriver["initial_line"]
+            if !@isdefined server_idx
+                server_idx = next_arriver["initial_line"]
             end    
-            data[data_x][data_y]["final_line"] = server_id 
+            data[data_x][data_y]["final_line"] = server_idx 
 
             # Server is not busy -> set pacakge in traffic, no w_time
-            if check_busy(server_list[server_id]) == false
+            if check_busy(server_list[server_idx]) == false
                 data[data_x][data_y]["w_time"] = 0.0
-                update_traffic(server_list[server_id],
+                update_traffic(server_list[server_idx],
                     true, data[data_x][data_y])
-
             # Server is busy-> set package in queue
             else
-                update_queue(server_list[server_id], 
+                update_queue(server_list[server_idx], 
                     true, data[data_x][data_y])
             end
+
             # Delete the item from data_to_be_reduced
-            popfirst!(data_to_be_reduced[data_x])
-        
+            popfirst!(data_to_be_reduced[data_x])        
 
 
 
@@ -175,11 +173,11 @@ function Run_the_queue(
             data_x, data_y = Find_datapoint_in_json(next_departure["id"])
 
             # Identify server where next event is occuring
-            server_id = Find_datapoint_in_server(server_list, next_departure["id"])
+            server_idx, server_nr = Find_datapoint_in_server(server_list, next_departure["id"])
             
             # Setting the identified variables
-            current_server = server_list[server_id]
-            datapoint = current_server.current_traffic[1]
+            current_server = server_list[server_idx]
+            datapoint = current_server.current_traffic[server_nr]
 
             # Fill in values for waiting time and final server line for the event.
             data[data_x][data_y]["final_line"] = datapoint["final_line"]
@@ -193,7 +191,7 @@ function Run_the_queue(
                 # Push that element into queue.
                 # Pop the departure from traffic
                 # Update the json data with new information
-            if check_busy(server_list[server_id]) == true
+            if check_busy(server_list[server_idx]) == true
 
                 # Server busy, and queue equals true
                 if length(current_server.current_queue) != 0
@@ -204,20 +202,21 @@ function Run_the_queue(
                     current_server.current_queue[1]["w_time"]  = wait_time_for_next
 
                     update_traffic(current_server, false, 
-                        current_server.current_traffic[1])
+                        current_server.current_traffic[server_nr])
                     update_traffic(current_server,true,
                         current_server.current_queue[1])
                     update_queue(current_server, false,
-                        current_server.current_traffic[1])
+                        current_server.current_queue[1])
+                # Server busy, but no queue
                 else
                     update_traffic(current_server, false, 
-                        current_server.current_traffic[1])  
+                        current_server.current_traffic[server_nr])  
                 end   
             
             # If server is not busy -> pop first element in traffic
             else
-                update_traffic(server_list[server_id], false,
-                    server_list[server_id].current_traffic[1])
+                update_traffic(current_server, false,
+                    current_server.current_traffic[server_nr])
             end
         process = process_end_at_end
         end

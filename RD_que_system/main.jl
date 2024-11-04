@@ -1,8 +1,4 @@
-println("START-----")
-println("----")
-println("---")
-println("--")
-println("-")
+println("--------------START--------------")
 
 include("src/00_arriver.jl")
 include("src/01_server.jl")
@@ -21,9 +17,10 @@ wait_time, que_length = Calculate_key_parameters(5)
 println("Average waiting time: ", wait_time)
 println("Average queue length: ", que_length)
 
-println("-")
-println("--")
-println("---")
-println("----")
-println("-----END")
+println("--------------END--------------")
 # myServer.current_queue
+
+
+# It seems like the value for departure equal a3 do not leave. 
+# Why? 
+# It is the first to come in when the traffic is busy, but the queue is zero.

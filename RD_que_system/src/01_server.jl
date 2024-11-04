@@ -53,7 +53,13 @@ function update_traffic(
     if add_true == true
         push!(self.current_traffic, change)
     else
-        popfirst!(self.current_traffic)
+        id = change["id"]
+        for j in 1:length(self.current_traffic)
+            if self.current_traffic[j]["id"] == id
+                deleteat!(self.current_traffic, j)
+                break
+            end
+        end
     end
 end
 
