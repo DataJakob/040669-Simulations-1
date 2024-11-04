@@ -25,6 +25,13 @@ end
 
 
 
+
+
+# Suggestion:
+#   Find next event
+#   Next event is arrival
+#   Next event is departure
+
 function Run_the_queue(
     server_base::ServerBase,
     stop_at_time::Float64,
@@ -95,7 +102,10 @@ function Run_the_queue(
                 end
             end
         end
-
+        
+        if @isdefined(dep_time)
+            println(dep_time)
+        end
 
 
 
@@ -174,6 +184,8 @@ function Run_the_queue(
             # Fill in values for waiting time and final server line for the event.
             data[data_x][data_y]["final_line"] = datapoint["final_line"]
             data[data_x][data_y]["w_time"] = datapoint["w_time"] 
+            data[data_x][data_y]["dep_time"] = datapoint["cum_ia_time"] +
+                datapoint["w_time"] + datapoint["s_time"]
 
 
             # If server is busy -> 

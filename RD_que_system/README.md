@@ -47,7 +47,7 @@ println("----------------------End-----------------------")
 | n        | n         |                                         | ✅      |
 |         |           |  Change server queue when queue too long | ✅      |
 |         |           |  Leave queue after time x                | ❌      |
-|         |           |  Calculate avg. queue length             | 🔜      |
-|         |           |  Calculate acg. waiting time             | 🔜      |
+|         |           |  Calculate avg. queue length             | ✅      |
+|         |           |  Calculate acg. waiting time             | ✅      |
 
 

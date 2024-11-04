@@ -84,6 +84,7 @@ mutable struct DataEntry
     s_time::Float64
     final_line::Int64
     w_time::Float64
+    dep_time::Float64
 end
 
 function Data_to_json(
@@ -102,6 +103,7 @@ function Data_to_json(
                 cum_ia_times[i][j][2],
                 s_times[i][j][2],
                 0,
+                0.0,
                 0.0
                 )
             push!(sub_data,deepcopy(sel_id))
