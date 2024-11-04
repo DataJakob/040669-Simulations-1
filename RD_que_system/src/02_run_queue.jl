@@ -14,7 +14,7 @@ end
 
 
 
-function Find_Datapoint_in_server(dict_vector::Vector{ServerBase}, id::String)
+function Find_datapoint_in_server(dict_vector::Vector{ServerBase}, id::String)
     for i in 1:length(dict_vector)
         if dict_vector[i].current_traffic[1]["id"] == id
             return i  
@@ -50,11 +50,9 @@ function Run_the_queue(
     bitch = 0
     while process == true
         bitch +=1
-        if length(data_to_be_reduced[1]) == 0   
-            if length(server_list[1].current_traffic)==1
-                process = false
-                process_end_at_end = false
-            end
+        if length(data_to_be_reduced[1]) == 0  && (length(server_list[1].current_traffic) + length(server_list[1].current_queue)) == 1
+            process = false
+            process_end_at_end = false
         end
 
 
@@ -99,14 +97,18 @@ function Run_the_queue(
         end
 
 
+
+
+
         # Break statement -> break if next event is past stopping time
         if next_departure["id"] != nothing
-            server_nr = Find_Datapoint_in_server(server_list, next_departure["id"])
+            server_nr = Find_datapoint_in_server(server_list, next_departure["id"])
             next_departure_time = server_list[server_nr].current_traffic[1]["cum_ia_time"] + server_list[server_nr].current_traffic[1]["s_time"]+ server_list[server_nr].current_traffic[1]["w_time"]
             lowest = min(isempty(next_arriver["cum_ia_time"]) ? Inf : next_arriver["cum_ia_time"],
             next_departure_time)
             if lowest > stop_at_time
                 process = false
+                println("break here")
                 break
             end
         end
@@ -123,74 +125,82 @@ function Run_the_queue(
             data_x, data_y = Find_datapoint_in_json(next_arriver["id"])
 
             # If server overload -> search for servers that's not overloaded
-            if length(server_list[next_arriver["initial_line"]].current_queue) >= server_base.queue_overload
-                server_idx = 0
+            if check_busy(server_list[next_arriver["initial_line"]])
+                server_id = 0
                 for i in 1:length(server_list)
                     if length(server_list[i].current_queue) < server_base.queue_overload
-                        server_idx = i
+                        server_id = i
                         break
                     end
                 end
             end
+
             # If server not overload -> set package in traffic or queue
             # Decide server number
-            # else
-            if !@isdefined server_idx
-                server_idx = next_arriver["initial_line"]
+            if !@isdefined server_id
+                server_id = next_arriver["initial_line"]
             end    
-            data_to_be_reduced[data_x][1]["final_line"] = server_idx  
+            data[data_x][data_y]["final_line"] = server_id 
 
-            # Server is not busy -> set in traffic, no w_time
-            println(length(server_list[server_idx].current_traffic))
-            if check_busy(server_list[server_idx]) == false
-                println("Not busy")
-                data_to_be_reduced[data_x][1]["w_time"] = 0.0
-                update_traffic(server_list[server_idx],
-                    true, 
-                    data_to_be_reduced[data_x][1])
+            # Server is not busy -> set pacakge in traffic, no w_time
+            if check_busy(server_list[server_id]) == false
+                data[data_x][data_y]["w_time"] = 0.0
+                update_traffic(server_list[server_id],
+                    true, data[data_x][data_y])
+
             # Server is busy-> set package in queue
             else
-                println("Busy")
-                update_queue(server_list[server_idx], 
-                    true,
-                    data_to_be_reduced[data_x][1])
-
+                update_queue(server_list[server_id], 
+                    true, data[data_x][data_y])
             end
-            println("--")
             # Delete the item from data_to_be_reduced
             popfirst!(data_to_be_reduced[data_x])
         
+
+
+
 
         # Departure is next event
         else
             data_x, data_y = Find_datapoint_in_json(next_departure["id"])
 
             # Identify server where next event is occuring
-            server_id = Find_Datapoint_in_server(server_list, next_departure["id"])
+            server_id = Find_datapoint_in_server(server_list, next_departure["id"])
+            
+            # Setting the identified variables
+            current_server = server_list[server_id]
+            datapoint = current_server.current_traffic[1]
 
             # Fill in values for waiting time and final server line for the event.
-            if isempty(server_list[server_id].current_traffic[1])
-                data[data_x][data_y]["final_line"] = next_departure["final_line"]
-                data[data_x][data_y]["w_time"] = 0
-            else
-                datapoint = server_list[server_id].current_traffic[1]
-                data[data_x][data_y]["final_line"] = datapoint["final_line"]
-                data[data_x][data_y]["w_time"] = datapoint["w_time"]
-            end
+            data[data_x][data_y]["final_line"] = datapoint["final_line"]
+            data[data_x][data_y]["w_time"] = datapoint["w_time"] 
+
+
             # If server is busy -> 
                 # Calculate waiting time for first element in queue
                 # Push that element into queue.
                 # Pop the departure from traffic
                 # Update the json data with new information
             if check_busy(server_list[server_id]) == true
-                wait_time_for_next = datapoint["cum_ia_time"]+
-                    datapoint["w_time"]+datapoint["s_time"]-
-                    server_list[next_departure["final_line"]].current_queue[1]["cum_ia_time"]            
-                server_list[next_departure["final_line"]].current_queue[1]["w_time"] = wait_time_for_next
-                update_traffic(server_list[next_departure["final_line"]],true,
-                    server_list[next_departure["final_line"]].current_queue[1])
-                update_queue(server_list[next_departure["final_line"]], false,
-                    server_list[next_departure["final_line"]].current_traffic[1])
+
+                # Server busy, and queue equals true
+                if length(current_server.current_queue) != 0
+                    wait_time_for_next = datapoint["cum_ia_time"] + 
+                        datapoint["w_time"] + datapoint["s_time"] -
+                        current_server.current_queue[1]["cum_ia_time"]
+
+                    current_server.current_queue[1]["w_time"]  = wait_time_for_next
+
+                    update_traffic(current_server, false, 
+                        current_server.current_traffic[1])
+                    update_traffic(current_server,true,
+                        current_server.current_queue[1])
+                    update_queue(current_server, false,
+                        current_server.current_traffic[1])
+                else
+                    update_traffic(current_server, false, 
+                        current_server.current_traffic[1])  
+                end   
             
             # If server is not busy -> pop first element in traffic
             else
@@ -201,6 +211,7 @@ function Run_the_queue(
         end
     end
     # Save and store the data to a json with all values filled in.
+    data = data
     json_string = JSON.json(data)
     open("RD_que_system/data/final_output.json", "w") do file
         write(file, json_string)

@@ -33,10 +33,10 @@ end
 Function to check if server is busy
 """
 function check_busy(self::ServerBase)
-    if length(self.current_traffic)-1 == self.n_servers
-        return true
-    else
+    if length(self.current_traffic) < self.n_servers
         return false
+    else
+        return true
     end
 end
 
