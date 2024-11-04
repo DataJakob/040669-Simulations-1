@@ -1,13 +1,13 @@
 include("00_arriver.jl")
 
 
+
 """
 Creating base for servers.
 """
 mutable struct ServerBase
     n_servers::Int64
     queue_overload::Int64
-
     current_traffic::Vector{Dict{String, Any}}
     current_queue:: Vector{Dict{String, Any}}
 
@@ -16,9 +16,8 @@ mutable struct ServerBase
         queue_overload::Int64,
         current_traffic::Vector{Dict{String, Any}} = Dict{String, Any}[],
         current_queue::Vector{Dict{String, Any}} = Dict{String, Any}[],
-        # current_traffic::Vector{Dict{String, Any}},
-        # current_queue::Vector{Dict{String, Any}},
         )
+
         return new(
             n_servers,
             queue_overload,
@@ -27,6 +26,7 @@ mutable struct ServerBase
         )
     end
 end 
+
 
 
 """
@@ -39,6 +39,7 @@ function check_busy(self::ServerBase)
         return true
     end
 end
+
 
 
 """
@@ -64,8 +65,9 @@ function update_traffic(
 end
 
 
+
 """
-Function for updating the state
+Function for updating the queue state
 of the server base
 """
 function update_queue(

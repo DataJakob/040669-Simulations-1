@@ -3,6 +3,11 @@ using Random
 using JSON
 
 
+
+"""
+Calculate the cumulative times for interarrival
+and service times. 
+"""
 function Distribution_Generator(
     distance_type::String,
     mu::Float64,
@@ -12,11 +17,6 @@ function Distribution_Generator(
     constant::Float64,
     random_seed::Int64,
     )
-    """
-    Calculate the cumulative times for interarrival
-    and service times. 
-    """
-
     Random.seed!(42)
     distribution_list = Vector{Vector{Tuple{String, Float64}}}()
 
@@ -54,6 +54,7 @@ function Distribution_Generator(
 end
 
 
+
 """ 
 Calculate the cumulative times for 
 interarrival and serivces times.
@@ -76,6 +77,9 @@ end
 
 
 
+"""
+Create a mutable structure to store data
+"""
 mutable struct DataEntry
     id::String
     initial_line::Int64
@@ -87,6 +91,12 @@ mutable struct DataEntry
     dep_time::Float64
 end
 
+
+
+"""
+Use interarrival, service and cumulative interarrival times
+to store the input data into a json file. 
+"""
 function Data_to_json(
     ia_times::Vector{Vector{Tuple{String,Float64}}}, 
     s_times::Vector{Vector{Tuple{String,Float64}}}, 
