@@ -121,7 +121,10 @@ function Data_to_json(
         push!(data, sub_data)
     end
     json_string = JSON.json(data)
-    open("RD_que_system/data/output.json", "w") do file
+    src_code_dir = @__DIR__
+    output_file_path = joinpath(src_code_dir, "../data/output.json")
+    open(output_file_path, "w") do file
         write(file, json_string)
     end
 end
+# println(@__DIR__)

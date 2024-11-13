@@ -43,8 +43,9 @@ function Run_the_queue(
     end
 
     # Create two dataframes -> one for iterating and one for storing data. 
-    file_path = "RD_que_system/data/output.json"
-    data = open(file_path, "r") do file
+    src_code_dir = @__DIR__
+    output_file_path = joinpath(src_code_dir, "../data/output.json")
+    data = open(output_file_path, "r") do file
         JSON.parse(file)
     end
     data_to_be_reduced = deepcopy(data)
@@ -223,8 +224,10 @@ function Run_the_queue(
     end
     # Save and store the data to a json with all values filled in.
     data = data
-    json_string = JSON.json(data)
-    open("RD_que_system/data/final_output.json", "w") do file
-        write(file, json_string)
+    data_string = JSON.json(data)
+    src_code_dir = @__DIR__
+    output_file_path = joinpath(src_code_dir, "../data/final_output.json")
+    open(output_file_path, "w") do file
+        write(file, data_string)
     end
 end

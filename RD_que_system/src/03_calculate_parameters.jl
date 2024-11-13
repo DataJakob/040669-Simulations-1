@@ -1,9 +1,9 @@
 
 
 function Calculate_key_parameters(end_at_person::Int64)
-
-    file_path = "RD_que_system/data/final_output.json"
-    data = open(file_path, "r") do file
+    src_code_dir = @__DIR__
+    output_file_path = joinpath(src_code_dir, "../data/final_output.json")
+    data = open(output_file_path, "r") do file
         JSON.parse(file)
     end
 
