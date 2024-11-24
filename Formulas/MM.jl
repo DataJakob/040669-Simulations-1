@@ -39,16 +39,21 @@ function calcuclate_MM1(self::queueKeyParameters)
 end
 
 function calculate_MMS(self::queueKeyParameters, servers::Int64)
-    self.p = self.lambda / self.mu
-    self.P0 = (sum([((self.lambda / self.mu)^i) / (factorial(i)) for i in 1:servers]) +
-        +((self.lambda / self.mu)^servers * (1/factorial(servers)) * 
-        ((servers * self.mu) / (servers * self.mu -self.lambda))))^-1
+
+    self.p = self.lambda / (self.mu*servers)
+
+    alfa = self.lambda / self.mu
+    part_1 = sum([(alfa)^(i) * factorial(i) for i in 0:servers-1])
+    part_2 = (alfa^(servers)) / factorial(servers)
+    part_3 = (1-(alfa/servers))^(-1)
+    self.P0 = (part_1 + part_2 * part_3)^(-1)
+       
     if self.n >= servers
-        self.Pn = (self.lambda / self.mu)^self.n / (factorial(servers) * (servers)^(self.n-servers))
+        self.Pn = ((self.lambda / self.mu)^self.n / (factorial(servers) * (servers)^(self.n-servers))) * self.P0
     else
-        self.Pn = (self.lambda/self.mu)^self.n / factorial(self.n)
+        self.Pn = ((self.lambda/self.mu)^self.n / factorial(self.n)) * self.P0
     end
-    self.Lq = (self.P0 * (self.lambda/self.mu)^servers * self.p) / (factorial(servers) * (1 - self.p)^2)
+    self.Lq = (self.P0 * ((self.lambda/self.mu)^servers) * self.p) / (factorial(servers) * ((1 - self.p)^2))
     self.L = self.Lq + (self.lambda / self.mu)
     self.Wq = self.Lq / self.lambda
     self.W = self.Wq + (1 / self.mu)

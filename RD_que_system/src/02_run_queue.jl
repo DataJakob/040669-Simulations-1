@@ -149,7 +149,7 @@ function Run_the_queue(
 
             # If server not overload -> set package in traffic or queue
             # Decide server number
-            if !@isdefined server_idx
+            if (!@isdefined server_idx) || (server_idx == 0)
                 server_idx = next_arriver["initial_line"]
             end    
             data[data_x][data_y]["final_line"] = server_idx 
