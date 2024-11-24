@@ -4,18 +4,19 @@ include("../../RD_que_system/src/00_arriver.jl")
 include("../../RD_que_system/src/01_server.jl")
 include("../../RD_que_system/src/02_run_queue.jl")
 include("../../RD_que_system/src/03_calculate_parameters.jl")
+include("src_ad_hoc.jl")
 
 n_lines = 1
 n_packages = 60
 n_servers_per_line = 1 
 n_packages_queue_overload = 60
 
-service_my = 1.1
-service_sigma = 0.4
+service_my = 1.0
+service_sigma = 0.01
 service_constant = 0.0
 
-interarrival_my = 1.0
-interarrival_sigma = 0.2
+interarrival_my = 0.50
+interarrival_sigma = 0.01
 interarrival_constant = 0.5
 
 stop_calculate_paratmeres_at_person_n = 60
@@ -31,11 +32,14 @@ cum_ia_times = Calculate_cum_ia_times(arrival_times)
 my_server = ServerBase(n_servers_per_line, n_packages_queue_overload)
 
 Data_to_json(arrival_times, service_times, cum_ia_times)
-Run_the_queue(my_server, 50.0)
+Run_the_queue(my_server, 30.0)
 
-wait_time, que_length = Calculate_key_parameters(stop_calculate_paratmeres_at_person_n)
+# wait_time, que_length = Calculate_key_parameters(stop_calculate_paratmeres_at_person_n)
+# println("Average waiting time: ", wait_time)
+# println("Average queue length: ", que_length)
 
-println("Average waiting time: ", wait_time)
-println("Average queue length: ", que_length)
+alfa = Steady_State_Check()
+# println(alfa)
+
 
 println("--------------END--------------")

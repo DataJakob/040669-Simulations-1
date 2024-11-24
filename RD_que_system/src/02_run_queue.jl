@@ -36,12 +36,6 @@ function Run_the_queue(
     stop_at_time::Float64,
     )
 
-    # Initialize servers
-    server_list = Vector{ServerBase}()
-    for i in 1:length(cum_ia_times)
-        push!(server_list, deepcopy(server_base))
-    end
-
     # Create two dataframes -> one for iterating and one for storing data. 
     src_code_dir = @__DIR__
     output_file_path = joinpath(src_code_dir, "../data/output.json")
@@ -49,6 +43,14 @@ function Run_the_queue(
         JSON.parse(file)
     end
     data_to_be_reduced = deepcopy(data)
+
+
+    # Initialize servers
+    server_list = Vector{ServerBase}()
+    for i in 1:length(data)
+        push!(server_list, deepcopy(server_base))
+    end
+
     
     # Break statement -> break if there is no data to be processed
     process = true
