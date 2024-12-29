@@ -5,7 +5,7 @@
 </p>
 <br>
 <p>
-    The course focuses on operational research and especially queueing theory and how to apply it using Julia. The course belongs to the SCM field of study. The course has 8 ECTS points.
+    The course focuses on operational research and especially queueing theory and how to apply it using Julia. The course belongs to the SCM field of study. The course has 4 ECTS points.
 </p>
 <h2> Course: </h2>
 <a href="https://ufind.univie.ac.at/en/course.html?lv=040669&semester=2024W">Simulation 1</a>
